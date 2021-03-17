@@ -7,13 +7,13 @@ const URL = 'http://localhost/ostoslista/';
 
 function App() {
 
-  const [lista, setLista] = useState([]);
-  const [ostos, setOstos] = useState(''); 
-  const [maara, setMaara] = useState(''); 
+  const [list, setEditList] = useState([]);
+  const [item, setItem] = useState(''); 
+  const [amount, setAmount] = useState(''); 
   
-  const [editOstos, setEditOstos] = useState(null);
-  const [editMaara, setEditMaara] = useState(null);
-  const [editKuvaus, setEditKuvaus] = useState('');
+  const [editItem, setEditItem] = useState(null);
+  const [editAmount, setEditAmount] = useState(null);
+  const [editDescription, setEditDescription] = useState('');
 
   useEffect(() => {
     let status = 0; 
@@ -25,7 +25,7 @@ function App() {
       .then(
         (res) => {
           if ( status === 200) {
-            setLista(res);
+            setEditList(res);
           } else {
             alert(res.error); 
           }
@@ -45,8 +45,8 @@ function App() {
         'Constent-type': 'application/json',
       },
       body: JSON.stringify({
-        kuvaus: ostos,
-        maara: maara
+        description: item,
+        amount: amount
       })
     })
     .then(res=> {
@@ -56,9 +56,9 @@ function App() {
     .then(
       (res) => {
         if (status === 200) {
-          setLista(lista => [...lista, res]);
-          setOstos('');
-          setMaara('');
+          setEditList(list => [...list, res]);
+          setItem('');
+          setAmount('');
         } else {
           alert(res.error);
         }
@@ -87,8 +87,8 @@ function App() {
     .then(
       (res) => {
       if (status === 200) {
-        const newListaWithoutRemove = lista.filter((item) => item.id !==id);
-        setLista(newListaWithoutRemove); 
+        const newListaWithoutRemove = list.filter((item) => item.id !==id);
+        setEditList(newListaWithoutRemove); 
       } else {
         alert(res.error);
       }
@@ -98,11 +98,11 @@ function App() {
     )
   };
 
-  function setEditedOstos(ostos, maara) {
-    setEditOstos(ostos);
-    setEditKuvaus(ostos?.kuvaus);
-    setEditMaara(maara);
-    setEditMaara(ostos?.maara)
+  function setEditedOstos(item, amount) {
+    setEditItem(item);
+    setEditDescription(item?.description);
+    setEditAmount(amount);
+    setEditAmount(item?.amount)
   }
 
   function update(e) {
@@ -115,9 +115,9 @@ function App() {
         'Content-type': 'application/json',
       },
       body: JSON.stringify({
-        id: editOstos.id,
-        kuvaus: editKuvaus,
-        maara: editMaara
+        id: editItem.id,
+        description: editDescription,
+        amount: editAmount
       })
     })
     .then(res => {
@@ -127,14 +127,14 @@ function App() {
     .then (
       (res) => {
         if (status === 200) {
-          lista[(lista.findIndex(ostos => ostos.id == editOstos.id))].kuvaus = editKuvaus;
-          lista[(lista.findIndex(ostos => ostos.id == editOstos.id))].maara = editMaara;
-          setLista([...lista]);
+          list[(list.findIndex(item => item.id == editItem.id))].description = editDescription;
+          list[(list.findIndex(item => item.id == editItem.id))].amount = editAmount;
+          setEditList([...list]);
 
 
-          setEditOstos(null); 
-          setEditKuvaus('');
-          setEditMaara('');
+          setEditItem(null); 
+          setEditDescription('');
+          setEditAmount('');
         } else {
           alert(res.error); 
         }
@@ -153,10 +153,10 @@ function App() {
         <div>
           <form onSubmit={save} className="form-group row w-50">
           <div className="mt-2">
-            <input type="text" className="form-control" placeholder="Kuvaus ostoksesta" value={ostos} onChange={e=> setOstos(e.target.value)}/>
+            <input type="text" className="form-control" placeholder="Kuvaus ostoksesta" value={item} onChange={e=> setItem(e.target.value)}/>
           </div>
           <div className="mt-2">
-            <input type="text" class="form-control" placeholder="Määrä" value={maara} onChange={e=> setMaara(e.target.value)} />
+            <input type="text" class="form-control" placeholder="Määrä" value={amount} onChange={e=> setAmount(e.target.value)} />
           </div>
           <div>
             <button className="col-3 btn btn-outline-primary mt-2">Save</button>
@@ -165,28 +165,28 @@ function App() {
         </div>
         <div className="mt-4">
           <ol>
-            {lista.map(ostos => (
-              <li key={ostos.id} className="mt-1">
-                {editOstos?.id !== ostos.id && ostos.kuvaus} {editOstos?.id !== ostos.id && ostos.maara}
+            {list.map(item => (
+              <li key={item.id} className="mt-1">
+                {editItem?.id !== item.id && item.description} {editItem?.id !== item.id && item.amount}
                   
-                  {editOstos?.id === ostos.id && 
+                  {editItem?.id === item.id && 
                     <form onSubmit={update}>
                       <div>
-                        <input value={editKuvaus} onChange={e => setEditKuvaus(e.target.value)}/>
-                        <input value={editMaara} onChange={e => setEditMaara(e.target.value)}/>
+                        <input value={editDescription} onChange={e => setEditDescription(e.target.value)}/>
+                        <input value={editAmount} onChange={e => setEditAmount(e.target.value)}/>
                       </div>
                       <button className="btn btn-outline-primary btn-sm mt-2">Save</button>
                       <button type="button" className="btn btn-outline-secondary btn-sm mt-2" onClick={() => setEditedOstos(null)}>Cancel</button>
                     </form>
                   }
               &nbsp;
-              {editOstos===null &&
-                <a type="button" className="btn btn-outline-secondary btn-sm" onClick={() => setEditedOstos(ostos)} href="#">
+              {editItem===null &&
+                <a type="button" className="btn btn-outline-secondary btn-sm" onClick={() => setEditedOstos(item)} href="#">
                   Edit
                 </a>  
               } &nbsp;
-              {editOstos===null &&
-               <a type="button" className="btn btn-outline-warning btn-sm" onClick={() => remove(ostos.id)} href="#">
+              {editItem===null &&
+               <a type="button" className="btn btn-outline-warning btn-sm" onClick={() => remove(item.id)} href="#">
                 Delete
               </a> 
               }
